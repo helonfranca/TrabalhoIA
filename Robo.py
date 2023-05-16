@@ -88,7 +88,7 @@ class Robo:
             "seguir_direcao_atual": 0
         }
         
-        self.estado_tabuleiro = [[False for _ in range(14)] for _ in range(14)]
+        self.estado_tabuleiro = [[False for _ in range(15)] for _ in range(15)]
 
     # lógica para encontrar o caminho usando o algoritmo A*
     def encontrar_caminho_A_star(self):
@@ -208,6 +208,39 @@ class Robo:
             print("Não há uma saida possivel!")
         else:
             self.tabuleiro.mostrar_caminho_vermelho(caminho)
+
+    def busca_largura(self):
+        # estado inicial
+        x, y = self.posX, self.posY
+        fila = [(x, y)]  # fila de estados para explorar
+        visitados = set()  # conjunto de estados visitados
+
+        while fila:
+            x, y = fila.pop(0)  # pegar o primeiro estado na fila
+
+            if (x, y) == self.final:
+                # objetivo alcançado, retornar o caminho
+                caminho = [(x, y)]
+
+                #self.mostrar_caminho(caminho)
+                while (x, y) != self.inicio:
+                    x, y = self.estado_tabuleiro[x][y]
+                    caminho.append((x, y))
+                caminho.reverse()
+                self.mostrar_caminho(caminho)
+            for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1)]:
+                novo_x, novo_y = x + dx, y + dy
+
+                if 0 <= novo_x < 15 and 0 <= novo_y < 15 and self.tabuleiro.obter_cor_quadrado(novo_x,novo_y) != "blue" and (novo_x, novo_y) not in visitados:
+
+                    visitados.add((novo_x, novo_y))
+                    self.estado_tabuleiro[novo_x][novo_y] = (x, y)  # armazenar o estado anterior para cada novo estado
+                    fila.append((novo_x, novo_y))
+
+            # objetivo não alcançável
+        if caminho:
+            self.tabuleiro.mostrar_caminho_vermelho(caminho)
+        return None
        
     # atualiza a interface gráfica do tabuleiro para mostrar o caminho percorrido pelo robô
     def atualizar_interface(self, caminho):
@@ -231,5 +264,13 @@ robo = Robo(tabuleiro, (0, 0), (14, 14))
 robo.encontrar_caminho_A_star() # chama a função encontrar caminho usando A*
 
 janela.mainloop()
-    
+
+janelaLarg = Tk()                               #Abre a janela mostrando o algoritmo A*
+janelaLarg.title("Trajeto de um Robô usando Busca por Largura")
+tabuleiroLarg = Tabuleiro(janelaLarg)
+robo2 = Robo(tabuleiroLarg, (0, 0), (14, 14))
+robo2.busca_largura()
+janelaLarg.mainloop()
+
+
 #problemas com abstaculos na diagonal: quando tem muitas ele tá ignorando
